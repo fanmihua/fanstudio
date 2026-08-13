@@ -1,0 +1,82 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+/.playwright-cli/
+/output/
+/outputs/
+
+# next.js
+/.next/
+/.next-build/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+/cert
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.tmp-email-preview.html
+
+# env files（公开仓库只保留无真实值的模板）
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/src/generated/prisma
+
+# uploaded media files (本地磁盘；生产环境需使用持久卷或自行接入对象存储)
+/public/uploads
+
+# private files (source files for download)
+/private-files
+
+# private business content and delivery files
+/content/private/
+/private-content/
+
+# AI tool history (may contain sensitive env values)
+.specstory/
+.cursor/
+
+# private ops docs (contains real domain/server info)
+docs/DOMAIN_MIGRATION.md
+
+# deploy script (contains server IP)
+deploy.sh
+
+# local tooling & editor configs (skills 入库随仓库走，其余本地配置不入库)
+.claude/*
+!.claude/skills/
+.codex/
+
+# cloned helper tools (should live in their own repo)
+/claude-talk-to-figma-mcp
+
+# local test scripts & settings backups (may contain sensitive values)
+/test-ai.js
+/settings-backup-*.json

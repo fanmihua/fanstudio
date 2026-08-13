@@ -1,0 +1,614 @@
+// Prisma Schema for 设计师个人网站
+// 数据库: MySQL 8.0+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 用户模型 ====================
+enum Role {
+  ADMIN // 管理员：完整读写权限
+  VIEWER // 体验账户：仅可浏览后台，无法修改
+}
+
+enum Locale {
+  ZH
+  EN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  name      String?  @db.VarChar(100)
+  avatar    String?  @db.Text
+  bio       String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+  works     Work[]
+}
+
+// ==================== 文章模型 ====================
+model Post {
+  id           String     @id @default(cuid())
+  title        String     @db.VarChar(255)
+  slug         String     @unique @db.VarChar(255)
+  content      Json // Plate 编辑器 JSON 内容
+  excerpt      String?    @db.Text
+  titleI18n    Json? // { zh: string, en: string }
+  slugI18n     Json? // { zh: string, en: string }
+  excerptI18n  Json? // { zh: string, en: string }
+  contentI18n  Json? // { zh: JSONContent, en: JSONContent }
+  seoI18n      Json? // { zh: { title, description }, en: { title, description } }
+  coverImage   String?    @db.Text
+  coverRatio   String     @default("3:4") @db.VarChar(10)
+  status       PostStatus @default(DRAFT)
+  categoryId   String?
+  category     Category?  @relation(fields: [categoryId], references: [id])
+  ctaProductId String?
+  ctaProduct   Product?   @relation(fields: [ctaProductId], references: [id])
+  ctaLabel     String?    @db.VarChar(120) // 文末产品按钮文案（可选）
+  tags         Tag[]
+  authorId     String
+  author       User       @relation(fields: [authorId], references: [id])
+  sortOrder    Int        @default(0)
+  likeCount    Int        @default(0)
+  shareCount   Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  publishedAt  DateTime?
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([authorId])
+}
+
+// ==================== 作品模型 ====================
+enum WorkType {
+  DESIGN // 设计作品
+  DEVELOPMENT // 开发作品
+}
+
+model Work {
+  id              String        @id @default(cuid())
+  title           String        @db.VarChar(255)
+  slug            String        @unique @db.VarChar(255)
+  titleI18n       Json? // { zh: string, en: string }
+  slugI18n        Json? // { zh: string, en: string }
+  workType        WorkType      @default(DESIGN) // 设计作品 / 开发作品
+  description     String?       @db.Text
+  content         Json? // 详细描述（Plate JSON）
+  descriptionI18n Json? // { zh: string, en: string }
+  contentI18n     Json? // { zh: JSONContent, en: JSONContent }
+  seoI18n         Json? // { zh: { title, description }, en: { title, description } }
+  coverImage      String        @db.Text
+  coverRatio      String        @default("3:4") @db.VarChar(10)
+  images          Json // 详情图数组，存储为 JSON
+  currentVersion  String?       @db.VarChar(20) // 当前最新版本号
+  price           Decimal?      @db.Decimal(10, 2)
+  isFree          Boolean       @default(false)
+  figmaUrl        String?       @db.Text // Figma 文件链接（前台嵌入预览 + 购买后跳转）
+  deliveryUrl     String?       @db.Text // 自定义交付链接（GitHub / 网盘等，购买后可复制）
+  fileUrl         String?       @db.Text
+  fileName        String?       @db.VarChar(255)
+  demoUrl         String?       @db.Text // 在线体验链接（开发作品）
+  demoQrCode      String?       @db.Text // 扫码体验二维码 data URL（开发作品）
+  status          WorkStatus    @default(DRAFT)
+  categoryId      String?
+  category        Category?     @relation(fields: [categoryId], references: [id])
+  authorId        String
+  author          User          @relation(fields: [authorId], references: [id])
+  tags            Tag[]
+  orders          Order[]
+  versions        WorkVersion[]
+  sortOrder       Int           @default(0)
+  likeCount       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+  @@index([workType])
+  @@index([categoryId])
+  @@index([authorId])
+}
+
+// ==================== 作品版本模型 ====================
+model WorkVersion {
+  id          String   @id @default(cuid())
+  workId      String
+  work        Work     @relation(fields: [workId], references: [id], onDelete: Cascade)
+  version     String   @db.VarChar(20) // "1.0", "2.0" 等
+  price       Decimal  @db.Decimal(10, 2)
+  changelog   String?  @db.Text // 更新说明
+  figmaUrl    String?  @db.Text // Figma 文件链接
+  deliveryUrl String?  @db.Text // 自定义交付链接（GitHub / 网盘等）
+  fileUrl     String?  @db.Text
+  fileName    String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+
+  orders Order[]
+
+  @@unique([workId, version])
+  @@index([workId])
+}
+
+// ==================== 订单模型 ====================
+model Order {
+  id            String       @id @default(cuid())
+  orderNo       String       @unique @db.VarChar(64)
+  workId        String
+  work          Work         @relation(fields: [workId], references: [id])
+  versionId     String?
+  version       WorkVersion? @relation(fields: [versionId], references: [id])
+  upgradeFromId String?      @db.VarChar(64) // 升级来源版本 ID
+  amount        Decimal      @db.Decimal(10, 2)
+  status        OrderStatus  @default(PENDING)
+  buyerEmail    String       @db.VarChar(255)
+  buyerName     String?      @db.VarChar(100)
+  buyerLocale   Locale       @default(ZH)
+  paymentId     String?      @db.VarChar(64) // 微信支付订单号
+  paidAt        DateTime?
+  downloadToken String?      @unique @db.VarChar(64)
+  downloadCount Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([status])
+  @@index([workId])
+  @@index([versionId])
+  @@index([buyerEmail])
+}
+
+// ==================== 分类模型 ====================
+model Category {
+  id        String          @id @default(cuid())
+  name      String          @db.VarChar(100)
+  slug      String          @unique @db.VarChar(100)
+  nameI18n  Json? // { zh: string, en: string }
+  slugI18n  Json? // { zh: string, en: string }
+  type      CategoryType
+  posts     Post[]
+  works     Work[]
+  tutorials VideoTutorial[]
+}
+
+// ==================== 标签模型 ====================
+model Tag {
+  id        String          @id @default(cuid())
+  name      String          @unique @db.VarChar(50)
+  nameI18n  Json? // { zh: string, en: string }
+  posts     Post[]
+  works     Work[]
+  tutorials VideoTutorial[]
+}
+
+// ==================== 媒体文件模型 ====================
+// 归属类型：文章 / 设计作品 / 开发作品 / 视频教程
+model Media {
+  id               String    @id @default(cuid())
+  name             String    @db.VarChar(255)
+  url              String    @db.Text
+  type             String    @db.VarChar(50) // image, video, file
+  size             Int
+  width            Int?
+  height           Int?
+  entityType       String    @db.VarChar(50) // POST | WORK_DESIGN | WORK_DEVELOPMENT | TUTORIAL
+  entityId         String    @db.VarChar(64) // Post.id / Work.id / VideoTutorial.id
+  createdAt        DateTime  @default(now())
+  lastReferencedAt DateTime?
+  cleanupAt        DateTime? // 全站无引用后进入待清理；到期仍无引用才物理删除
+
+  @@index([type])
+  @@index([entityType])
+  @@index([entityType, entityId])
+  @@index([cleanupAt])
+  @@index([lastReferencedAt])
+}
+
+// ==================== 网站设置模型 ====================
+model Settings {
+  id              String   @id @default("settings")
+  siteName        String   @default("Fan's Studio") @db.VarChar(255)
+  defaultLocale   Locale   @default(ZH)
+  avatar          String?  @db.Text
+  socialLinks     Json? // { wechat, xiaohongshu, officialAccount, bilibili, figma, youshe, x, github }
+  about           Json? // 关于页内容
+  nav             Json? // { logoText, works, blog, about, tutorials } 导航品牌与名称
+  navI18n         Json? // { zh: nav, en: nav }
+  pageCopy        Json? // 各页页头介绍与首页 Hero 文案
+  pageCopyI18n    Json? // { zh: pageCopy, en: pageCopy }
+  aiAssistant     Json? // AI 助手配置（欢迎语、引导问题、占位文案等）
+  aiAssistantI18n Json? // { zh: aiAssistant, en: aiAssistant }
+  aiModelConfig   Json? // AI 模型配置（provider、模型白名单、默认模型、前台切换开关）
+  theme           Json? // { base: "neutral", accent: "fanmihua" } 主题配置
+  footer          Json? // { copyrightText: "Your Name", version: "0.1.0" } 页脚版权与版本
+  footerI18n      Json? // { zh: footer, en: footer }
+  updatedAt       DateTime @updatedAt
+}
+
+// ==================== 站点统计（访问量 / 通行人数，宣传用）====================
+model SiteStat {
+  id         String   @id @default("site") // 单行
+  pageViews  Int      @default(0) // 真实累计 PV（每次打开计数页面原子 +1）
+  baseVisits Int      @default(0) // 后台可配：访问基数（宣传起始值）
+  basePasses Int      @default(0) // 后台可配：通行基数
+  updatedAt  DateTime @updatedAt
+}
+
+// ==================== 视频教程模型 ====================
+model VideoTutorial {
+  id              String    @id @default(cuid())
+  title           String    @db.VarChar(255)
+  slug            String    @unique @db.VarChar(255)
+  titleI18n       Json? // { zh: string, en: string }
+  slugI18n        Json? // { zh: string, en: string }
+  description     String?   @db.Text
+  descriptionI18n Json? // { zh: string, en: string }
+  seoI18n         Json? // { zh: { title, description }, en: { title, description } }
+  videoUrl        String    @db.Text // 视频链接（B 站、YouTube 等）
+  thumbnail       String?   @db.Text
+  coverRatio      String    @default("3:4") @db.VarChar(10)
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  tags            Tag[]
+  sortOrder       Int       @default(0)
+  likeCount       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([categoryId])
+}
+
+// ==================== 留言板（来坐坐）模型 ====================
+model GuestbookMessage {
+  id        String             @id @default(cuid())
+  nickname  String?            @db.VarChar(60) // 昵称，选填；空显示「匿名朋友」
+  content   String             @db.Text // 留言内容（支持 emoji，utf8mb4）
+  hidden    Boolean            @default(false) // 后台软隐藏：前台不显示但不删库
+  pinned    Boolean            @default(false) // 置顶（仅顶层留言有效）
+  isOwner   Boolean            @default(false) // 博主（登录管理员）留言/回复标记
+  ipHash    String?            @db.VarChar(64) // 客户端 IP 哈希（防滥用，不存明文）
+  parentId  String? // 盖楼：父留言 id（仅一层回复）
+  parent    GuestbookMessage?  @relation("GuestbookThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   GuestbookMessage[] @relation("GuestbookThread")
+  createdAt DateTime           @default(now())
+
+  @@index([parentId])
+  @@index([hidden, createdAt])
+}
+
+// ==================== 枚举类型 ====================
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum WorkStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum OrderStatus {
+  PENDING // 待支付
+  PAID // 已支付（数字商品自动交付）
+  CANCELLED // 已取消
+  REFUNDED // 已退款
+}
+
+enum CategoryType {
+  POST
+  WORK
+  DESIGN
+  DEVELOPMENT
+  TUTORIAL
+}
+
+// ==================== AI 知识库模型 ====================
+enum KnowledgeSourceType {
+  POST
+  WORK
+  TUTORIAL
+  SETTINGS
+}
+
+enum KnowledgeSourceStatus {
+  ACTIVE
+  DELETED
+}
+
+enum KnowledgeAssetType {
+  IMAGE
+}
+
+enum KnowledgeJobType {
+  UPSERT_SOURCE
+  DELETE_SOURCE
+  FULL_REBUILD
+}
+
+enum KnowledgeJobStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model KnowledgeSource {
+  id         String                @id @default(cuid())
+  sourceType KnowledgeSourceType
+  sourceId   String                @db.VarChar(191)
+  locale     Locale                @default(ZH)
+  slug       String?               @db.VarChar(255)
+  title      String                @db.VarChar(255)
+  url        String                @db.Text
+  status     KnowledgeSourceStatus @default(ACTIVE)
+  hash       String                @db.VarChar(64)
+  updatedAt  DateTime              @updatedAt
+  chunks     KnowledgeChunk[]
+  assets     KnowledgeAsset[]
+
+  @@unique([sourceType, sourceId, locale])
+  @@index([status])
+  @@index([sourceType])
+  @@index([locale])
+}
+
+model KnowledgeChunk {
+  id            String          @id @default(cuid())
+  sourceId      String
+  source        KnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  chunkIndex    Int
+  contentText   String          @db.LongText
+  locale        Locale          @default(ZH)
+  contentTokens Int             @default(0)
+  embedding     Json?
+  meta          Json?
+  createdAt     DateTime        @default(now())
+
+  @@unique([sourceId, chunkIndex])
+  @@index([sourceId])
+  @@index([locale])
+}
+
+model KnowledgeAsset {
+  id        String             @id @default(cuid())
+  sourceId  String
+  source    KnowledgeSource    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  assetType KnowledgeAssetType @default(IMAGE)
+  url       String             @db.Text
+  locale    Locale             @default(ZH)
+  caption   String?            @db.VarChar(255)
+  ocrText   String?            @db.Text
+  embedding Json?
+  width     Int?
+  height    Int?
+  hash      String?            @db.VarChar(64)
+  createdAt DateTime           @default(now())
+
+  @@index([sourceId])
+  @@index([locale])
+}
+
+model KnowledgeSyncJob {
+  id        String             @id @default(cuid())
+  jobType   KnowledgeJobType
+  payload   Json?
+  status    KnowledgeJobStatus @default(PENDING)
+  error     String?            @db.Text
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([status])
+  @@index([jobType])
+}
+
+// ==================== 会员、产品与访问权益模型 ====================
+// Member 是「顾客」，与上方 User（后台管理员）完全独立、互不影响。
+
+enum MembershipPlanKey {
+  MONTH // 月卡
+  YEAR // 年卡
+  LIFETIME // 永久
+  QUARTER // 季度卡（后加，置于末尾以避免 MySQL ENUM 重排既有索引）
+}
+
+// 会员订单来源：付费购买或管理员赠送
+enum MembershipOrderSource {
+  PURCHASE // 付费购买
+  COMP // 管理员赠送（无支付）
+}
+
+// 可单独售卖并授予访问权益的产品
+model Product {
+  id           String            @id @default(cuid())
+  key          String            @unique @db.VarChar(64)
+  name         String            @db.VarChar(100)
+  blurb        String?           @db.VarChar(255)
+  landingPath  String?           @db.VarChar(255) // 产品入口；文章 CTA 可跳转到这里
+  enabled      Boolean           @default(true)
+  isAllAccess  Boolean           @default(false) // 全站通：其权益覆盖所有产品
+  sortOrder    Int               @default(0)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  plans        MembershipPlan[]
+  entitlements Entitlement[]
+  orders       MembershipOrder[]
+  ctaPosts     Post[]
+  promoCodes   PromoCode[]
+}
+
+// 权益：某会员对某产品的访问权（替代 Member.accessUntil）
+model Entitlement {
+  id            String                @id @default(cuid())
+  memberId      String
+  member        Member                @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product               @relation(fields: [productId], references: [id])
+  isLifetime    Boolean               @default(false)
+  expiresAt     DateTime?
+  revokedAt     DateTime? // 撤销：非空即失效
+  source        MembershipOrderSource @default(PURCHASE)
+  note          String?               @db.VarChar(255)
+  sourceOrderId String?               @db.VarChar(64)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@unique([memberId, productId])
+  @@index([productId])
+  @@index([expiresAt])
+}
+
+// 会员账号（顾客）——与 User（管理员）分开
+model Member {
+  id           String            @id @default(cuid())
+  email        String            @unique @db.VarChar(255)
+  name         String?           @db.VarChar(100)
+  wechatOpenId String?           @unique @db.VarChar(64) // 预留：以后微信登录
+  phone        String?           @unique @db.VarChar(20) // 预留：以后手机登录
+  disabled     Boolean           @default(false) // 封禁：禁止登录 + 所有权益失效
+  archivedAt   DateTime? // 后台归档：默认隐藏 + 禁止登录/访问，可恢复
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  orders       MembershipOrder[]
+  entitlements Entitlement[]
+  sessions     MemberSession[]
+
+  @@index([archivedAt])
+}
+
+// 会员登录会话：每账号最多 2 台设备同时在线，超出踢「最久未用」(lastSeenAt 最早) 的那台
+model MemberSession {
+  id         String   @id @default(cuid()) // = cookie token 里的 sid
+  memberId   String
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  userAgent  String?  @db.VarChar(255)
+  ip         String?  @db.VarChar(64)
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([memberId])
+}
+
+// 套餐：月 / 季 / 年 / 永久。价格、原价、有效天数和开关均可在后台调整
+model MembershipPlan {
+  id            String            @id @default(cuid())
+  productId     String
+  product       Product           @relation(fields: [productId], references: [id])
+  key           MembershipPlanKey
+  name          String            @db.VarChar(100)
+  price         Decimal           @db.Decimal(10, 2)
+  originalPrice Decimal?          @db.Decimal(10, 2) // 划线原价
+  durationDays  Int? // 有效天数；null = 永久
+  enabled       Boolean           @default(false) // 前台是否展示售卖
+  badge         String?           @db.VarChar(50) // 角标，如「早鸟」（纯文案，无库存逻辑）
+  recommended   Boolean           @default(false) // 前台高亮「推荐」描边；同产品内单选
+  sortOrder     Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  orders        MembershipOrder[]
+
+  @@unique([productId, key])
+}
+
+// 会员订单。status 复用现有 OrderStatus（PENDING/PAID/CANCELLED/REFUNDED）
+model MembershipOrder {
+  id            String                @id @default(cuid())
+  orderNo       String                @unique @db.VarChar(64)
+  memberId      String
+  member        Member                @relation(fields: [memberId], references: [id])
+  productId     String
+  product       Product               @relation(fields: [productId], references: [id])
+  planId        String?
+  plan          MembershipPlan?       @relation(fields: [planId], references: [id])
+  promoCodeId   String?
+  promoCode     PromoCode?            @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  promoCodeText String?               @db.VarChar(64) // 下单时码串快照（码删了也能查“谁用过”）
+  planKey       MembershipPlanKey? // 下单时套餐 key 快照（赠送单可空）
+  planName      String                @db.VarChar(100) // 套餐名/赠送说明快照（套餐改名/删也能查）
+  source        MembershipOrderSource @default(PURCHASE) // 付费 or 赠送
+  note          String?               @db.VarChar(255) // 备注（赠送原因或客服说明）
+  amount        Decimal               @db.Decimal(10, 2)
+  status        OrderStatus           @default(PENDING)
+  paymentId     String?               @db.VarChar(64) // 微信支付订单号
+  grantsDays    Int? // 本单授予天数；永久单为 null
+  isLifetime    Boolean               @default(false) // 本单是否授予永久
+  buyerEmail    String                @db.VarChar(255) // 冗余，便于后台搜索
+  paidAt        DateTime?
+  refundedAt    DateTime?
+  archivedAt    DateTime? // 后台归档：默认隐藏，可恢复；不影响退款/权益状态
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([status])
+  @@index([source])
+  @@index([productId])
+  @@index([memberId])
+  @@index([buyerEmail])
+  @@index([promoCodeId])
+  @@index([archivedAt])
+}
+
+// 会员支付/订单事件日志。用于排查下单、扫码、回调、自动清理等关键链路。
+model MembershipEvent {
+  id        String   @id @default(cuid())
+  orderId   String?
+  orderNo   String?  @db.VarChar(64)
+  memberId  String?
+  productId String?
+  email     String?  @db.VarChar(255)
+  type      String   @db.VarChar(64)
+  level     String   @default("INFO") @db.VarChar(16)
+  message   String   @db.VarChar(255)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([orderNo])
+  @@index([memberId])
+  @@index([email])
+  @@index([type])
+  @@index([level])
+  @@index([createdAt])
+}
+
+// 会员折扣码（公开口令，发群里大家用）：百分比折扣，精确到分。后台全自助配置。
+model PromoCode {
+  id             String             @id @default(cuid())
+  code           String             @unique @db.VarChar(64) // 规范化（去空格+大写）后存储；大小写不敏感、支持中文
+  productId      String
+  product        Product            @relation(fields: [productId], references: [id])
+  planKey        MembershipPlanKey? // 限定套餐；null = 全场所有在售套餐
+  percentOff     Int // 立减百分比 1–99；20 = 8 折
+  maxRedemptions Int? // 总量上限（成功支付计数）；null = 不限
+  redeemedCount  Int                @default(0) // 已成功支付次数
+  startsAt       DateTime? // 生效时间；null = 立即
+  expiresAt      DateTime? // 失效时间；null = 永不过期
+  enabled        Boolean            @default(true)
+  note           String?            @db.VarChar(255) // 备注，如「社群活动」
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  orders         MembershipOrder[]
+
+  @@index([productId])
+}
+
+// 邮箱登录验证码（不存明文，存 sha256）
+model VerificationCode {
+  id         String    @id @default(cuid())
+  email      String    @db.VarChar(255)
+  codeHash   String    @db.VarChar(64)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}

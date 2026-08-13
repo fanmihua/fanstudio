@@ -1,0 +1,797 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  
+  /* Lesbian Pride Flag Colors - 仅用于装饰 */
+  --color-pride-1: #D52D00;
+  --color-pride-2: #EF7627;
+  --color-pride-3: #FF9A56;
+  --color-pride-4: #FFFFFF;
+  --color-pride-5: #D162A4;
+  --color-pride-6: #B55690;
+  --color-pride-7: #A30262;
+}
+
+/* Light Mode (Default) */
+:root {
+  --radius: 0.75rem;
+  
+  /* Light Theme Colors */
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  
+  --primary: #0a0a0a;
+  --primary-foreground: #fafafa;
+  
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  
+  --destructive: #ef4444;
+  
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #0a0a0a;
+  
+  /* Charts */
+  --chart-1: #D52D00;
+  --chart-2: #EF7627;
+  --chart-3: #FF9A56;
+  --chart-4: #D162A4;
+  --chart-5: #A30262;
+  
+  --sidebar: #f4f4f5;
+  --sidebar-foreground: #09090b;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #0a0a0a;
+  
+  /* Gradients — 使用主题变量，ThemeColorProvider 会动态覆盖 */
+  --pride-gradient: linear-gradient(
+    180deg,
+    var(--color-pride-1) 0%,
+    var(--color-pride-2) 14.28%,
+    var(--color-pride-3) 28.57%,
+    var(--color-pride-4) 42.85%,
+    var(--color-pride-5) 57.14%,
+    var(--color-pride-6) 71.42%,
+    var(--color-pride-7) 100%
+  );
+  
+  --pride-gradient-h: linear-gradient(
+    90deg,
+    var(--color-pride-1) 0%,
+    var(--color-pride-2) 14.28%,
+    var(--color-pride-3) 28.57%,
+    var(--color-pride-4) 42.85%,
+    var(--color-pride-5) 57.14%,
+    var(--color-pride-6) 71.42%,
+    var(--color-pride-7) 100%
+  );
+}
+
+/* Dark Mode */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  
+  --card: #161616;
+  --card-foreground: #f5f5f5;
+  
+  --popover: #161616;
+  --popover-foreground: #f5f5f5;
+  
+  --primary: #f5f5f5;
+  --primary-foreground: #0a0a0a;
+  
+  --secondary: #1c1c1c;
+  --secondary-foreground: #f5f5f5;
+  
+  --muted: #1c1c1c;
+  --muted-foreground: #a3a3a3;
+  
+  --accent: #1c1c1c;
+  --accent-foreground: #f5f5f5;
+  
+  --destructive: #ef4444;
+  
+  --border: #333333;
+  --input: #333333;
+  --ring: #525252;
+  
+  --sidebar: #111111;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: #f5f5f5;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1c1c1c;
+  --sidebar-accent-foreground: #f5f5f5;
+  --sidebar-border: #333333;
+  --sidebar-ring: #525252;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  html, body {
+    overflow-x: hidden;
+  }
+
+  @supports (overflow: clip) {
+    html, body {
+      overflow-x: clip;
+    }
+  }
+  
+  /* 主题强调色 selection */
+  ::selection {
+    background: color-mix(in srgb, var(--color-pride-5) 25%, transparent);
+    color: inherit;
+  }
+
+  /* Editorial serif for headings */
+  .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
+  }
+}
+
+/* Pride underline hover */
+.pride-underline {
+  position: relative;
+  text-decoration: none;
+}
+.pride-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--pride-gradient-h);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pride-underline:hover::after {
+  width: 100%;
+}
+
+/* ==================== 装饰效果 ==================== */
+
+.pride-bar {
+  height: 3px;
+  background: var(--pride-gradient);
+}
+
+.pride-text {
+  background: var(--pride-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pride-text-h {
+  background: var(--pride-gradient-h);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pride-glow {
+  box-shadow: 
+    0 0 20px color-mix(in srgb, var(--color-pride-5) 15%, transparent),
+    0 0 40px color-mix(in srgb, var(--color-pride-2) 10%, transparent);
+}
+
+/* ==================== 玻璃拟态效果 ==================== */
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .glass {
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dark .glass-strong {
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-subtle {
+  background: rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.dark .glass-subtle {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* ==================== 卡片效果 ==================== */
+
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.card-hover:hover {
+  background: var(--card);
+  border-color: var(--border);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .card-hover:hover {
+  background: rgba(30, 30, 30, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+/* ==================== 高亮效果 ==================== */
+
+/* 文字高亮 */
+.highlight {
+  color: var(--foreground);
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+.dark .highlight {
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* 标签 */
+.tag {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  color: var(--foreground);
+  background: var(--accent);
+  border-color: var(--border);
+}
+
+.dark .tag {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .tag:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tag-primary {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--primary-foreground);
+}
+
+.dark .tag-primary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.content-meta-pill-primary {
+  background: rgba(24, 24, 27, 0.05);
+  color: rgba(24, 24, 27, 0.72);
+}
+
+.content-meta-pill-muted {
+  background: #f4f4f5;
+  color: #71717a;
+}
+
+.dark .content-meta-pill-primary {
+  background: rgba(250, 250, 250, 0.1);
+  color: rgba(250, 250, 250, 0.78);
+}
+
+.dark .content-meta-pill-muted {
+  background: rgba(250, 250, 250, 0.08);
+  color: rgba(212, 212, 216, 0.82);
+}
+
+/* ==================== 动画效果 ==================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px color-mix(in srgb, var(--color-pride-5) 20%, transparent); }
+  50% { box-shadow: 0 0 40px color-mix(in srgb, var(--color-pride-5) 40%, transparent); }
+}
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -20px); }
+}
+.animate-float { animation: float 20s ease-in-out infinite; }
+.animate-float-slow { animation: float 30s ease-in-out infinite; }
+
+/* ==================== 导航栏样式 ==================== */
+
+.nav-item {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-item:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+.nav-item.active {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+.dark .nav-item { color: #737373; }
+.dark .nav-item:hover { color: #fafafa; background: rgba(255, 255, 255, 0.05); }
+.dark .nav-item.active { color: #fafafa; background: rgba(255, 255, 255, 0.1); }
+
+.bottom-nav {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+/* ==================== 滚动条隐藏 ==================== */
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ==================== 颜色选择器紧凑网格 ==================== */
+.bn-color-picker-dropdown {
+  display: flex !important;
+  flex-wrap: wrap;
+  max-width: 220px;
+  padding: 8px !important;
+  gap: 2px;
+}
+
+/* 分组标题（Text / Background）全宽显示 */
+.bn-color-picker-dropdown [data-slot="dropdown-menu-label"] {
+  flex-basis: 100%;
+  width: 100%;
+  padding: 4px 4px 2px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* 颜色选项 — 紧凑方块 */
+.bn-color-picker-dropdown [data-slot="dropdown-menu-checkbox-item"] {
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 隐藏左侧复选框指示器 */
+.bn-color-picker-dropdown [data-slot="dropdown-menu-checkbox-item"] > span:first-child {
+  display: none !important;
+}
+
+/* 色块图标居中且放大 */
+.bn-color-picker-dropdown [data-slot="dropdown-menu-checkbox-item"] svg {
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0;
+}
+
+/* 选中态 — 外圈高亮 */
+.bn-color-picker-dropdown [data-slot="dropdown-menu-checkbox-item"][data-state="checked"] {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
+
+/* ==================== 编辑器全屏层 ==================== */
+.blocknote-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+.blocknote-shell-full {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.blocknote-shell-full .blocknote-scroll {
+  flex: 1;
+}
+.blocknote-shell-full .bn-container,
+.blocknote-shell-full .bn-editor {
+  min-height: 100%;
+}
+
+/* ==================== 文字样式 ==================== */
+
+.text-gradient {
+  background: linear-gradient(to right, #000000, #555555);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.dark .text-gradient {
+  background: linear-gradient(to right, #fafafa, #a3a3a3);
+}
+
+.link-underline { position: relative; }
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--foreground);
+  opacity: 0.5;
+  transition: width 0.3s ease;
+}
+.link-underline:hover::after { width: 100%; }
+.dark .link-underline::after { background: rgba(255, 255, 255, 0.5); }
+
+/* ==================== 网格背景 ==================== */
+
+.grid-bg {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.dark .grid-bg {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* ==================== 噪点纹理 ==================== */
+
+.noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 50;
+  mix-blend-mode: multiply; /* Light mode: multiply makes it darker */
+}
+
+.dark .noise::before {
+  opacity: 0.05;
+  mix-blend-mode: overlay; /* Dark mode: overlay makes it lighter */
+}
+
+.pride-bottom-border { position: relative; }
+.pride-bottom-border::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--color-pride-1) 40%, transparent) 5%,
+    color-mix(in srgb, var(--color-pride-2) 40%, transparent) 15%,
+    color-mix(in srgb, var(--color-pride-3) 40%, transparent) 30%,
+    color-mix(in srgb, var(--color-pride-4) 30%, transparent) 50%,
+    color-mix(in srgb, var(--color-pride-5) 40%, transparent) 70%,
+    color-mix(in srgb, var(--color-pride-6) 40%, transparent) 85%,
+    color-mix(in srgb, var(--color-pride-7) 40%, transparent) 95%,
+    transparent 100%
+  );
+}
+
+/* Prose 内容中的主题色覆盖 */
+.prose-theme a { color: var(--color-pride-5); }
+.prose-theme code { color: var(--color-pride-3); }
+.prose-theme pre {
+  background: rgba(24, 24, 27, 0.04);
+}
+.prose-theme pre code {
+  display: block;
+  color: #18181b;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.dark .prose-theme pre code {
+  color: #f4f4f5;
+}
+.dark .prose-theme pre {
+  background: rgba(250, 250, 250, 0.08);
+}
+@supports (background: color-mix(in srgb, black 5%, white)) {
+  .prose-theme pre {
+    background: color-mix(in srgb, var(--foreground) 5%, var(--background));
+  }
+  .dark .prose-theme pre {
+    background: color-mix(in srgb, var(--foreground) 8%, var(--background));
+  }
+  .prose-theme pre code {
+    color: var(--foreground);
+  }
+}
+.prose-theme blockquote { border-left-color: var(--color-pride-5); }
+
+.vignette { position: relative; }
+.vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%);
+  pointer-events: none;
+}
+.dark .vignette::after {
+  background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+@keyframes ai-launcher-border-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes ai-launcher-glow-breathe {
+  0%, 100% {
+    box-shadow:
+      0 6px 16px color-mix(in srgb, var(--color-pride-5) 14%, transparent),
+      0 0 0 color-mix(in srgb, var(--color-pride-2) 0%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 8px 22px color-mix(in srgb, var(--color-pride-5) 28%, transparent),
+      0 0 18px color-mix(in srgb, var(--color-pride-2) 16%, transparent);
+  }
+}
+
+.ai-launcher {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--foreground), var(--foreground)) padding-box,
+    linear-gradient(
+      90deg,
+      var(--color-pride-1),
+      var(--color-pride-2),
+      var(--color-pride-3),
+      var(--color-pride-5),
+      var(--color-pride-6),
+      var(--color-pride-7),
+      var(--color-pride-1)
+    ) border-box;
+  background-size: 100% 100%, 220% 100%;
+  animation: ai-launcher-border-flow 5.5s linear infinite, ai-launcher-glow-breathe 2.8s ease-in-out infinite;
+}
+
+.ai-launcher:hover {
+  box-shadow:
+    0 10px 26px color-mix(in srgb, var(--color-pride-5) 32%, transparent),
+    0 0 24px color-mix(in srgb, var(--color-pride-2) 20%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-launcher {
+    animation: none;
+  }
+}
+
+@keyframes hero-ai-border-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 220% 50%; }
+}
+
+.hero-ai-flow-border {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-pride-1) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-2) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-5) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-7) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-1) 70%, transparent)
+  );
+  background-size: 240% 100%;
+  animation: hero-ai-border-flow 7.5s linear infinite;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--color-pride-5) 10%, transparent);
+}
+
+.hero-ai-flow-inner {
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.hero-ai-flow-outer {
+  position: relative;
+  border-radius: calc(var(--radius-2xl));
+  isolation: isolate;
+}
+
+.hero-ai-flow-outer::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius-2xl) + 1px);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-pride-1) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-2) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-5) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-7) 70%, transparent),
+    color-mix(in srgb, var(--color-pride-1) 70%, transparent)
+  );
+  background-size: 240% 100%;
+  animation: hero-ai-border-flow 7.5s linear infinite;
+  z-index: -1;
+}
+
+.assistant-welcome-outer {
+  position: relative;
+  border-radius: calc(var(--radius-2xl));
+  isolation: isolate;
+}
+
+.assistant-welcome-outer::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius-2xl) + 1px);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-pride-2) 58%, transparent),
+    color-mix(in srgb, var(--color-pride-5) 58%, transparent),
+    color-mix(in srgb, var(--color-pride-7) 58%, transparent),
+    color-mix(in srgb, var(--color-pride-2) 58%, transparent)
+  );
+  background-size: 220% 100%;
+  animation: hero-ai-border-flow 9s linear infinite;
+  z-index: -1;
+}
+
+.assistant-welcome-inner {
+  position: relative;
+  background: var(--card);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-pride-5) 8%, transparent);
+}
+
+.assistant-welcome-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-pride-1) 8%, transparent),
+    transparent 42%,
+    color-mix(in srgb, var(--color-pride-5) 8%, transparent)
+  );
+}
+
+.assistant-welcome-inner > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ai-flow-border,
+  .hero-ai-flow-outer::before,
+  .assistant-welcome-outer::before {
+    animation: none;
+  }
+}
